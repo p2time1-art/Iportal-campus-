@@ -1,0 +1,206 @@
+{
+  "name": "AssignmentSubmission",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "assignment_id": {
+      "type": "string",
+      "title": "Assignment ID"
+    },
+    "assignment_title": {
+      "type": "string",
+      "title": "Assignment Title"
+    },
+    "class_id": {
+      "type": "string",
+      "title": "Class ID"
+    },
+    "subject_id": {
+      "type": "string",
+      "title": "Subject ID"
+    },
+    "subject_name": {
+      "type": "string",
+      "title": "Subject Name"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "student_name": {
+      "type": "string",
+      "title": "Student Name"
+    },
+    "student_user_id": {
+      "type": "string",
+      "title": "Student User ID"
+    },
+    "teacher_user_id": {
+      "type": "string",
+      "title": "Teacher User ID"
+    },
+    "content": {
+      "type": "string",
+      "title": "Submission Content"
+    },
+    "file_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "Submission File URL"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Submitted At"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "graded",
+        "late"
+      ],
+      "default": "submitted",
+      "title": "Submission Status"
+    },
+    "grade": {
+      "type": "number",
+      "title": "Grade"
+    },
+    "grade_label": {
+      "type": "string",
+      "title": "Grade Label"
+    },
+    "feedback": {
+      "type": "string",
+      "title": "Teacher Feedback"
+    },
+    "is_released": {
+      "type": "boolean",
+      "default": false,
+      "title": "Feedback Released to Student"
+    },
+    "graded_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Graded At"
+    },
+    "graded_by_id": {
+      "type": "string",
+      "title": "Graded By User ID"
+    }
+  },
+  "required": [
+    "school_id",
+    "assignment_id",
+    "student_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.teacher_user_id": "{{user.id}}"
+        },
+        {
+          "data.student_user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.student_user_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.teacher_user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

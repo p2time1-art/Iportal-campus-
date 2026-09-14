@@ -1,0 +1,76 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "The role of the user in the app",
+      "enum": [
+        "admin",
+        "user"
+      ]
+    },
+    "active_school_id": {
+      "type": "string",
+      "title": "Active School ID",
+      "description": "The school this user is currently operating in (drives tenant isolation)."
+    },
+    "active_role": {
+      "type": "string",
+      "title": "Active School Role",
+      "enum": [
+        "super_admin",
+        "school_admin",
+        "teacher",
+        "student",
+        "parent"
+      ]
+    },
+    "is_school_admin": {
+      "type": "boolean",
+      "title": "Is School Admin",
+      "default": false
+    },
+    "is_super_admin": {
+      "type": "boolean",
+      "title": "Is Super Admin",
+      "default": false
+    },
+    "pin": {
+      "type": "string",
+      "title": "Platform User PIN",
+      "description": "Unique platform identifier in SS-ROL-XXXXXX format. Generated server-side. Also serves as the initial login password for newly created accounts."
+    },
+    "pin_generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "PIN Generated At"
+    },
+    "pin_last_updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "PIN Last Updated At"
+    },
+    "must_change_password": {
+      "type": "boolean",
+      "title": "Must Change Password",
+      "default": false,
+      "description": "Set to true when the user's initial password is their PIN. Cleared after the user changes their password."
+    },
+    "password_initialized": {
+      "type": "boolean",
+      "title": "Password Initialized",
+      "default": false,
+      "description": "Indicates the user's auth account was created with an initial password (PIN)."
+    },
+    "password_changed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Password Changed At",
+      "description": "Timestamp of the user's most recent password change."
+    }
+  },
+  "required": [
+    "role"
+  ]
+}

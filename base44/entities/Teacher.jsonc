@@ -1,0 +1,160 @@
+{
+  "name": "Teacher",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "full_name": {
+      "type": "string",
+      "title": "Full Name"
+    },
+    "staff_id": {
+      "type": "string",
+      "title": "Staff ID"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date",
+      "title": "Date of Birth"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female"
+      ],
+      "title": "Gender"
+    },
+    "photo_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "Photo URL"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Phone"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+    },
+    "address": {
+      "type": "string",
+      "title": "Address"
+    },
+    "qualification": {
+      "type": "string",
+      "title": "Qualification"
+    },
+    "user_id": {
+      "type": "string",
+      "title": "Linked User Account ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active",
+      "title": "Status"
+    }
+  },
+  "required": [
+    "school_id",
+    "full_name",
+    "staff_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

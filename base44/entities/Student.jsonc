@@ -1,0 +1,175 @@
+{
+  "name": "Student",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "full_name": {
+      "type": "string",
+      "title": "Full Name"
+    },
+    "admission_number": {
+      "type": "string",
+      "title": "Admission Number"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date",
+      "title": "Date of Birth"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female"
+      ],
+      "title": "Gender"
+    },
+    "photo_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "Photo URL"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Phone"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+    },
+    "address": {
+      "type": "string",
+      "title": "Address"
+    },
+    "current_class_id": {
+      "type": "string",
+      "title": "Current Class ID"
+    },
+    "current_class_name": {
+      "type": "string",
+      "title": "Current Class Name"
+    },
+    "current_session_id": {
+      "type": "string",
+      "title": "Current Session ID"
+    },
+    "admission_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Admission Date"
+    },
+    "user_id": {
+      "type": "string",
+      "title": "Linked User Account ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "graduated",
+        "transferred"
+      ],
+      "default": "active",
+      "title": "Status"
+    }
+  },
+  "required": [
+    "school_id",
+    "full_name",
+    "admission_number"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

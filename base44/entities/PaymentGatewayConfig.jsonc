@@ -1,0 +1,138 @@
+{
+  "name": "PaymentGatewayConfig",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "gateway": {
+      "type": "string",
+      "enum": [
+        "paystack",
+        "flutterwave"
+      ],
+      "default": "paystack",
+      "title": "Payment Gateway"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "title": "Enabled"
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "test",
+        "live"
+      ],
+      "default": "test",
+      "title": "Environment"
+    },
+    "currency": {
+      "type": "string",
+      "default": "NGN",
+      "title": "Currency"
+    },
+    "encrypted_secret_key": {
+      "type": "string",
+      "title": "Encrypted Secret Key"
+    },
+    "encrypted_public_key": {
+      "type": "string",
+      "title": "Encrypted Public Key"
+    },
+    "encrypted_webhook_secret": {
+      "type": "string",
+      "title": "Encrypted Webhook Secret"
+    },
+    "has_credentials": {
+      "type": "boolean",
+      "default": false,
+      "title": "Has Credentials Configured"
+    },
+    "last_tested_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Last Connection Test At"
+    },
+    "last_test_status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed"
+      ],
+      "title": "Last Connection Test Status"
+    },
+    "last_test_message": {
+      "type": "string",
+      "title": "Last Connection Test Message"
+    },
+    "configured_by_id": {
+      "type": "string",
+      "title": "Configured By User ID"
+    },
+    "configured_by_name": {
+      "type": "string",
+      "title": "Configured By Name"
+    }
+  },
+  "required": [
+    "school_id",
+    "gateway",
+    "enabled"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

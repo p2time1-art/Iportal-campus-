@@ -1,0 +1,286 @@
+{
+  "name": "Result",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "session_id": {
+      "type": "string",
+      "title": "Academic Session ID"
+    },
+    "session_name": {
+      "type": "string",
+      "title": "Session Name"
+    },
+    "term_id": {
+      "type": "string",
+      "title": "Term ID"
+    },
+    "term_name": {
+      "type": "string",
+      "title": "Term Name"
+    },
+    "class_id": {
+      "type": "string",
+      "title": "Class ID"
+    },
+    "class_name": {
+      "type": "string",
+      "title": "Class Name"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "student_name": {
+      "type": "string",
+      "title": "Student Name"
+    },
+    "student_user_id": {
+      "type": "string",
+      "title": "Student User ID"
+    },
+    "subject_id": {
+      "type": "string",
+      "title": "Subject ID"
+    },
+    "subject_name": {
+      "type": "string",
+      "title": "Subject Name"
+    },
+    "teacher_id": {
+      "type": "string",
+      "title": "Teacher ID"
+    },
+    "teacher_name": {
+      "type": "string",
+      "title": "Teacher Name"
+    },
+    "teacher_user_id": {
+      "type": "string",
+      "title": "Teacher User ID"
+    },
+    "grading_scheme_id": {
+      "type": "string",
+      "title": "Grading Scheme ID"
+    },
+    "components": {
+      "type": "object",
+      "title": "Component Scores",
+      "properties": {}
+    },
+    "total_score": {
+      "type": "number",
+      "title": "Total Score"
+    },
+    "max_total": {
+      "type": "number",
+      "title": "Maximum Total"
+    },
+    "percentage": {
+      "type": "number",
+      "title": "Percentage"
+    },
+    "grade": {
+      "type": "string",
+      "title": "Grade"
+    },
+    "grade_point": {
+      "type": "number",
+      "title": "Grade Point"
+    },
+    "remark": {
+      "type": "string",
+      "title": "Subject Teacher Remark"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "approved",
+        "published",
+        "rejected"
+      ],
+      "default": "draft",
+      "title": "Status"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Submitted At"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Approved At"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Published At"
+    },
+    "rejected_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Rejected At"
+    },
+    "approved_by_id": {
+      "type": "string",
+      "title": "Approved By User ID"
+    },
+    "published_by_id": {
+      "type": "string",
+      "title": "Published By User ID"
+    },
+    "review_note": {
+      "type": "string",
+      "title": "Review / Rejection Note"
+    }
+  },
+  "required": [
+    "school_id",
+    "session_id",
+    "term_id",
+    "class_id",
+    "student_id",
+    "subject_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.teacher_user_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.student_user_id": "{{user.id}}"
+            },
+            {
+              "data.status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.teacher_user_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.teacher_user_id": "{{user.id}}"
+            },
+            {
+              "data.status": "draft"
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.teacher_user_id": "{{user.id}}"
+            },
+            {
+              "data.status": "rejected"
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "name": "Payment",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "student_name": {
+      "type": "string",
+      "title": "Student Name"
+    },
+    "student_user_id": {
+      "type": "string",
+      "title": "Student User ID"
+    },
+    "admission_number": {
+      "type": "string",
+      "title": "Admission Number"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Amount",
+      "minimum": 0
+    },
+    "payment_reference": {
+      "type": "string",
+      "title": "Payment Reference"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "bank_transfer",
+        "pos",
+        "online",
+        "cheque",
+        "other"
+      ],
+      "default": "cash",
+      "title": "Payment Method"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Payment Date"
+    },
+    "academic_session_id": {
+      "type": "string",
+      "title": "Academic Session ID"
+    },
+    "session_name": {
+      "type": "string",
+      "title": "Session Name"
+    },
+    "term_id": {
+      "type": "string",
+      "title": "Term ID"
+    },
+    "term_name": {
+      "type": "string",
+      "title": "Term Name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "successful",
+        "failed",
+        "reversed",
+        "refunded",
+        "cancelled"
+      ],
+      "default": "pending",
+      "title": "Status"
+    },
+    "recorded_by_id": {
+      "type": "string",
+      "title": "Recorded By User ID"
+    },
+    "recorded_by_name": {
+      "type": "string",
+      "title": "Recorded By Name"
+    },
+    "verified_by_id": {
+      "type": "string",
+      "title": "Verified By User ID"
+    },
+    "verified_by_name": {
+      "type": "string",
+      "title": "Verified By Name"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Verified At"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    },
+    "external_reference": {
+      "type": "string",
+      "title": "External Reference"
+    },
+    "receipt_id": {
+      "type": "string",
+      "title": "Receipt ID"
+    }
+  },
+  "required": [
+    "school_id",
+    "student_id",
+    "amount",
+    "payment_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.student_user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "name": "PlatformTransaction",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "subscription_id": {
+      "type": "string",
+      "title": "Subscription ID"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0,
+      "title": "Amount"
+    },
+    "currency": {
+      "type": "string",
+      "default": "NGN",
+      "title": "Currency"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "bank_transfer",
+        "pos",
+        "online",
+        "cheque",
+        "other"
+      ],
+      "default": "bank_transfer",
+      "title": "Payment Method"
+    },
+    "external_reference": {
+      "type": "string",
+      "title": "External Reference"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "successful",
+        "failed",
+        "reversed",
+        "refunded"
+      ],
+      "default": "pending",
+      "title": "Status"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Transaction Date"
+    },
+    "verified_by_id": {
+      "type": "string",
+      "title": "Verified By User ID"
+    },
+    "verified_by_name": {
+      "type": "string",
+      "title": "Verified By Name"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Verified At"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "school_id",
+    "amount",
+    "transaction_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "name": "GradingScheme",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "name": {
+      "type": "string",
+      "title": "Scheme Name"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": false,
+      "title": "Is Active Scheme"
+    },
+    "components": {
+      "type": "array",
+      "title": "Score Components",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Component Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Component Label"
+          },
+          "max_score": {
+            "type": "number",
+            "title": "Maximum Score"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "max_score"
+        ]
+      }
+    },
+    "grade_boundaries": {
+      "type": "array",
+      "title": "Grade Boundaries",
+      "items": {
+        "type": "object",
+        "properties": {
+          "min_score": {
+            "type": "number",
+            "title": "Minimum Score (inclusive)"
+          },
+          "grade": {
+            "type": "string",
+            "title": "Grade Label"
+          },
+          "grade_point": {
+            "type": "number",
+            "title": "Grade Point"
+          },
+          "remark": {
+            "type": "string",
+            "title": "Remark"
+          }
+        },
+        "required": [
+          "min_score",
+          "grade"
+        ]
+      }
+    },
+    "enable_position": {
+      "type": "boolean",
+      "default": false,
+      "title": "Enable Class Position / Ranking"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    }
+  },
+  "required": [
+    "school_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.school_id": "{{user.data.active_school_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "recipient_user_id": {
+      "type": "string",
+      "title": "Recipient User ID"
+    },
+    "announcement_id": {
+      "type": "string",
+      "title": "Announcement ID"
+    },
+    "title": {
+      "type": "string",
+      "title": "Notification Title"
+    },
+    "message": {
+      "type": "string",
+      "title": "Notification Message"
+    },
+    "notification_type": {
+      "type": "string",
+      "enum": [
+        "announcement",
+        "system"
+      ],
+      "default": "announcement",
+      "title": "Notification Type"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "title": "Is Read"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Read At"
+    }
+  },
+  "required": [
+    "school_id",
+    "recipient_user_id",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.recipient_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "data.recipient_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

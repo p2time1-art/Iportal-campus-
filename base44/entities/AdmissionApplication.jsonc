@@ -1,0 +1,206 @@
+{
+  "name": "AdmissionApplication",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "application_number": {
+      "type": "string",
+      "title": "Application Number"
+    },
+    "programme": {
+      "type": "string",
+      "title": "Programme / Class Applied For"
+    },
+    "full_name": {
+      "type": "string",
+      "title": "Applicant Full Name"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Phone"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date",
+      "title": "Date of Birth"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female"
+      ],
+      "title": "Gender"
+    },
+    "address": {
+      "type": "string",
+      "title": "Address"
+    },
+    "previous_school": {
+      "type": "string",
+      "title": "Previous School"
+    },
+    "previous_qualification": {
+      "type": "string",
+      "title": "Previous Qualification"
+    },
+    "guardian_name": {
+      "type": "string",
+      "title": "Guardian Name"
+    },
+    "guardian_phone": {
+      "type": "string",
+      "title": "Guardian Phone"
+    },
+    "guardian_email": {
+      "type": "string",
+      "format": "email",
+      "title": "Guardian Email"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Uploaded Documents"
+    },
+    "application_fee_amount": {
+      "type": "number",
+      "default": 0,
+      "title": "Application Fee Amount"
+    },
+    "application_fee_paid": {
+      "type": "boolean",
+      "default": false,
+      "title": "Application Fee Paid"
+    },
+    "application_fee_payment_id": {
+      "type": "string",
+      "title": "Application Fee Payment ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "under_review",
+        "accepted",
+        "rejected",
+        "admitted",
+        "enrolled"
+      ],
+      "default": "submitted",
+      "title": "Status"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Submitted At"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Applicant Notes"
+    },
+    "review_notes": {
+      "type": "string",
+      "title": "Review Notes"
+    },
+    "reviewed_by_id": {
+      "type": "string",
+      "title": "Reviewed By User ID"
+    },
+    "reviewed_by_name": {
+      "type": "string",
+      "title": "Reviewed By Name"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Reviewed At"
+    }
+  },
+  "required": [
+    "school_id",
+    "application_number",
+    "full_name",
+    "email",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

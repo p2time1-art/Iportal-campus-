@@ -1,0 +1,91 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "actor_user_id": {
+      "type": "string",
+      "title": "Actor User ID"
+    },
+    "actor_name": {
+      "type": "string",
+      "title": "Actor Name"
+    },
+    "actor_role": {
+      "type": "string",
+      "title": "Actor Role"
+    },
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "action": {
+      "type": "string",
+      "title": "Action"
+    },
+    "entity_type": {
+      "type": "string",
+      "title": "Entity Type"
+    },
+    "entity_id": {
+      "type": "string",
+      "title": "Entity ID"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {},
+      "title": "Metadata"
+    }
+  },
+  "required": [
+    "actor_user_id",
+    "action"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

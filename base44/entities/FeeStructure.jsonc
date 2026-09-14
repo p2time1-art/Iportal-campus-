@@ -1,0 +1,153 @@
+{
+  "name": "FeeStructure",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "academic_session_id": {
+      "type": "string",
+      "title": "Academic Session ID"
+    },
+    "session_name": {
+      "type": "string",
+      "title": "Session Name"
+    },
+    "term_id": {
+      "type": "string",
+      "title": "Term ID"
+    },
+    "term_name": {
+      "type": "string",
+      "title": "Term Name"
+    },
+    "class_id": {
+      "type": "string",
+      "title": "Class ID"
+    },
+    "class_name": {
+      "type": "string",
+      "title": "Class Name"
+    },
+    "fee_category_id": {
+      "type": "string",
+      "title": "Fee Category ID"
+    },
+    "category_name": {
+      "type": "string",
+      "title": "Category Name"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Amount",
+      "minimum": 0
+    },
+    "compulsory": {
+      "type": "boolean",
+      "default": true,
+      "title": "Compulsory"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active",
+      "title": "Status"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Due Date"
+    }
+  },
+  "required": [
+    "school_id",
+    "academic_session_id",
+    "fee_category_id",
+    "amount"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.school_id": "{{user.data.active_school_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "name": "PaymentAllocation",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "payment_id": {
+      "type": "string",
+      "title": "Payment ID"
+    },
+    "student_charge_id": {
+      "type": "string",
+      "title": "Student Charge ID"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Allocated Amount",
+      "minimum": 0
+    },
+    "category_name": {
+      "type": "string",
+      "title": "Category Name"
+    }
+  },
+  "required": [
+    "school_id",
+    "payment_id",
+    "student_charge_id",
+    "amount"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

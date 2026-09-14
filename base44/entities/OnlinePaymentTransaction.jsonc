@@ -1,0 +1,263 @@
+{
+  "name": "OnlinePaymentTransaction",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "student_name": {
+      "type": "string",
+      "title": "Student Name"
+    },
+    "student_user_id": {
+      "type": "string",
+      "title": "Student User ID"
+    },
+    "admission_number": {
+      "type": "string",
+      "title": "Admission Number"
+    },
+    "payer_user_id": {
+      "type": "string",
+      "title": "Payer User ID"
+    },
+    "payer_name": {
+      "type": "string",
+      "title": "Payer Name"
+    },
+    "payer_email": {
+      "type": "string",
+      "format": "email",
+      "title": "Payer Email"
+    },
+    "gateway": {
+      "type": "string",
+      "enum": [
+        "paystack",
+        "flutterwave"
+      ],
+      "default": "paystack",
+      "title": "Payment Gateway"
+    },
+    "gateway_reference": {
+      "type": "string",
+      "title": "Gateway Transaction Reference"
+    },
+    "internal_reference": {
+      "type": "string",
+      "title": "Internal Transaction Reference"
+    },
+    "authorization_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "Gateway Authorization URL"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0,
+      "title": "Amount"
+    },
+    "currency": {
+      "type": "string",
+      "default": "NGN",
+      "title": "Currency"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "initiated",
+        "pending",
+        "success",
+        "failed",
+        "cancelled",
+        "expired",
+        "reversed"
+      ],
+      "default": "initiated",
+      "title": "Transaction Status"
+    },
+    "payment_id": {
+      "type": "string",
+      "title": "Linked Payment ID"
+    },
+    "receipt_id": {
+      "type": "string",
+      "title": "Linked Receipt ID"
+    },
+    "receipt_number": {
+      "type": "string",
+      "title": "Receipt Number"
+    },
+    "charge_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Charge IDs Being Paid"
+    },
+    "allocation_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "charge_id": {
+            "type": "string"
+          },
+          "category_name": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "title": "Pre-calculated Allocation Plan"
+    },
+    "session_name": {
+      "type": "string",
+      "title": "Session Name"
+    },
+    "term_name": {
+      "type": "string",
+      "title": "Term Name"
+    },
+    "class_name": {
+      "type": "string",
+      "title": "Class Name"
+    },
+    "academic_session_id": {
+      "type": "string",
+      "title": "Academic Session ID"
+    },
+    "term_id": {
+      "type": "string",
+      "title": "Term ID"
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "test",
+        "live"
+      ],
+      "default": "test",
+      "title": "Gateway Environment"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {},
+      "title": "Gateway Metadata"
+    },
+    "initiated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Initiated At"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Verified At"
+    },
+    "failed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Failed At"
+    },
+    "failure_reason": {
+      "type": "string",
+      "title": "Failure Reason"
+    },
+    "gateway_response": {
+      "type": "string",
+      "title": "Gateway Response Message"
+    },
+    "callback_url": {
+      "type": "string",
+      "title": "Post-payment Callback URL"
+    }
+  },
+  "required": [
+    "school_id",
+    "student_id",
+    "payer_user_id",
+    "gateway",
+    "internal_reference",
+    "amount",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.payer_user_id": "{{user.id}}"
+        },
+        {
+          "data.student_user_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

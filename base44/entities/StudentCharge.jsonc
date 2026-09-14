@@ -1,0 +1,205 @@
+{
+  "name": "StudentCharge",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "student_name": {
+      "type": "string",
+      "title": "Student Name"
+    },
+    "student_user_id": {
+      "type": "string",
+      "title": "Student User ID"
+    },
+    "admission_number": {
+      "type": "string",
+      "title": "Admission Number"
+    },
+    "fee_structure_id": {
+      "type": "string",
+      "title": "Fee Structure ID"
+    },
+    "academic_session_id": {
+      "type": "string",
+      "title": "Academic Session ID"
+    },
+    "session_name": {
+      "type": "string",
+      "title": "Session Name"
+    },
+    "term_id": {
+      "type": "string",
+      "title": "Term ID"
+    },
+    "term_name": {
+      "type": "string",
+      "title": "Term Name"
+    },
+    "class_id": {
+      "type": "string",
+      "title": "Class ID"
+    },
+    "class_name": {
+      "type": "string",
+      "title": "Class Name"
+    },
+    "fee_category_id": {
+      "type": "string",
+      "title": "Fee Category ID"
+    },
+    "category_name": {
+      "type": "string",
+      "title": "Category Name"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Original Amount",
+      "minimum": 0
+    },
+    "discount_amount": {
+      "type": "number",
+      "title": "Discount Amount",
+      "default": 0,
+      "minimum": 0
+    },
+    "net_amount": {
+      "type": "number",
+      "title": "Net Amount",
+      "minimum": 0
+    },
+    "amount_paid": {
+      "type": "number",
+      "title": "Amount Paid",
+      "default": 0
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Due Date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "partially_paid",
+        "paid",
+        "waived",
+        "cancelled",
+        "overdue"
+      ],
+      "default": "pending",
+      "title": "Status"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "school_id",
+    "student_id",
+    "academic_session_id",
+    "fee_category_id",
+    "amount",
+    "net_amount"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.student_user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            },
+            {
+              "data.status": "pending"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

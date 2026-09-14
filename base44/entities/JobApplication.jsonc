@@ -1,0 +1,143 @@
+{
+  "name": "JobApplication",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "vacancy_id": {
+      "type": "string",
+      "title": "Vacancy ID"
+    },
+    "vacancy_title": {
+      "type": "string",
+      "title": "Vacancy Title"
+    },
+    "application_number": {
+      "type": "string",
+      "title": "Application Number"
+    },
+    "full_name": {
+      "type": "string",
+      "title": "Applicant Full Name"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Phone"
+    },
+    "cover_letter": {
+      "type": "string",
+      "title": "Cover Letter"
+    },
+    "resume_url": {
+      "type": "string",
+      "title": "Resume URL"
+    },
+    "resume_name": {
+      "type": "string",
+      "title": "Resume File Name"
+    },
+    "qualifications": {
+      "type": "string",
+      "title": "Qualifications"
+    },
+    "experience": {
+      "type": "string",
+      "title": "Experience"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "under_review",
+        "shortlisted",
+        "interviewed",
+        "rejected",
+        "hired"
+      ],
+      "default": "submitted",
+      "title": "Status"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Submitted At"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "school_id",
+    "vacancy_id",
+    "application_number",
+    "full_name",
+    "email",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

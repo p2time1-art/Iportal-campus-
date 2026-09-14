@@ -1,0 +1,200 @@
+{
+  "name": "TermRemark",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "session_id": {
+      "type": "string",
+      "title": "Session ID"
+    },
+    "term_id": {
+      "type": "string",
+      "title": "Term ID"
+    },
+    "class_id": {
+      "type": "string",
+      "title": "Class ID"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "student_name": {
+      "type": "string",
+      "title": "Student Name"
+    },
+    "student_user_id": {
+      "type": "string",
+      "title": "Student User ID"
+    },
+    "class_teacher_remark": {
+      "type": "string",
+      "title": "Class Teacher Remark"
+    },
+    "class_teacher_id": {
+      "type": "string",
+      "title": "Class Teacher User ID"
+    },
+    "principal_remark": {
+      "type": "string",
+      "title": "Principal / Admin Remark"
+    },
+    "principal_id": {
+      "type": "string",
+      "title": "Principal User ID"
+    },
+    "overall_total": {
+      "type": "number",
+      "title": "Overall Total Marks"
+    },
+    "overall_average": {
+      "type": "number",
+      "title": "Overall Average"
+    },
+    "overall_grade": {
+      "type": "string",
+      "title": "Overall Grade"
+    },
+    "class_position": {
+      "type": "number",
+      "title": "Class Position"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft",
+      "title": "Status"
+    }
+  },
+  "required": [
+    "school_id",
+    "session_id",
+    "term_id",
+    "student_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.class_teacher_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.student_user_id": "{{user.id}}"
+            },
+            {
+              "data.status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.class_teacher_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.class_teacher_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

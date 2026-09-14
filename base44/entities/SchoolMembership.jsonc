@@ -1,0 +1,162 @@
+{
+  "name": "SchoolMembership",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "title": "User ID"
+    },
+    "user_email": {
+      "type": "string",
+      "title": "User Email",
+      "format": "email"
+    },
+    "user_name": {
+      "type": "string",
+      "title": "Display Name"
+    },
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "super_admin",
+        "school_admin",
+        "teacher",
+        "student",
+        "parent"
+      ],
+      "title": "Role"
+    },
+    "login_pin": {
+      "type": "string",
+      "title": "Login PIN"
+    },
+    "user_pin": {
+      "type": "string",
+      "title": "Platform User PIN",
+      "description": "Denormalized copy of the User entity PIN for school admin visibility."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "invited",
+        "suspended"
+      ],
+      "default": "active",
+      "title": "Status"
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false,
+      "title": "Is Primary Membership"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Custom Permissions"
+    },
+    "linked_student_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Linked Student IDs (Parent)"
+    },
+    "metadata": {
+      "type": "object",
+      "title": "Metadata",
+      "properties": {}
+    }
+  },
+  "required": [
+    "school_id",
+    "role"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        }
+      ]
+    }
+  }
+}

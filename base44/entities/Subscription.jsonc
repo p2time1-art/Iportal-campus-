@@ -1,0 +1,139 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "plan_name": {
+      "type": "string",
+      "enum": [
+        "free",
+        "basic",
+        "premium"
+      ],
+      "default": "basic",
+      "title": "Plan"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "active",
+        "expired",
+        "suspended",
+        "cancelled"
+      ],
+      "default": "trial",
+      "title": "Status"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Start Date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Expiry Date"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0,
+      "title": "Amount"
+    },
+    "currency": {
+      "type": "string",
+      "default": "NGN",
+      "title": "Currency"
+    },
+    "billing_cycle": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "termly",
+        "annually",
+        "one_time"
+      ],
+      "default": "annually",
+      "title": "Billing Cycle"
+    },
+    "external_reference": {
+      "type": "string",
+      "title": "External Reference"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "school_id",
+    "plan_name",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "data.is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

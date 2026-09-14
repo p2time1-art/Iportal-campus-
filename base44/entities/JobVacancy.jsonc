@@ -1,0 +1,142 @@
+{
+  "name": "JobVacancy",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "school_name": {
+      "type": "string",
+      "title": "School Name"
+    },
+    "title": {
+      "type": "string",
+      "title": "Job Title"
+    },
+    "description": {
+      "type": "string",
+      "title": "Job Description"
+    },
+    "requirements": {
+      "type": "string",
+      "title": "Requirements"
+    },
+    "department": {
+      "type": "string",
+      "title": "Department"
+    },
+    "location": {
+      "type": "string",
+      "title": "Location"
+    },
+    "employment_type": {
+      "type": "string",
+      "enum": [
+        "full_time",
+        "part_time",
+        "contract",
+        "internship"
+      ],
+      "default": "full_time",
+      "title": "Employment Type"
+    },
+    "closing_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Closing Date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed"
+      ],
+      "default": "open",
+      "title": "Status"
+    },
+    "posted_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Posted At"
+    }
+  },
+  "required": [
+    "school_id",
+    "title",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.status": "open"
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

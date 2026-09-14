@@ -1,0 +1,209 @@
+{
+  "name": "Assignment",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "title": "School ID"
+    },
+    "session_id": {
+      "type": "string",
+      "title": "Session ID"
+    },
+    "term_id": {
+      "type": "string",
+      "title": "Term ID"
+    },
+    "class_id": {
+      "type": "string",
+      "title": "Class ID"
+    },
+    "class_name": {
+      "type": "string",
+      "title": "Class Name"
+    },
+    "subject_id": {
+      "type": "string",
+      "title": "Subject ID"
+    },
+    "subject_name": {
+      "type": "string",
+      "title": "Subject Name"
+    },
+    "teacher_id": {
+      "type": "string",
+      "title": "Teacher ID"
+    },
+    "teacher_name": {
+      "type": "string",
+      "title": "Teacher Name"
+    },
+    "teacher_user_id": {
+      "type": "string",
+      "title": "Teacher User ID"
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "instructions": {
+      "type": "string",
+      "title": "Instructions"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Issue Date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Due Date"
+    },
+    "file_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "Attachment URL"
+    },
+    "max_score": {
+      "type": "number",
+      "default": 100,
+      "title": "Maximum Score"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "closed"
+      ],
+      "default": "draft",
+      "title": "Status"
+    }
+  },
+  "required": [
+    "school_id",
+    "class_id",
+    "subject_id",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.teacher_user_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.teacher_user_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "data.teacher_user_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.school_id": "{{user.data.active_school_id}}"
+            },
+            {
+              "user_condition": {
+                "data.is_school_admin": true
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
