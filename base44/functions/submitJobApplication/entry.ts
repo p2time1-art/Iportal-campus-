@@ -48,7 +48,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     if (phone && !isValidPhone(phone)) {
-      return Response.json({ error: 'Phone number must contain digits only (7–15 digits).' }, { status: 400 });
+      return Response.json({ error: 'Phone number must contain digits only (11 digits).' }, { status: 400 });
     }
 
     // Validate vacancy exists and is open

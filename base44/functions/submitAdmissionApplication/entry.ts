@@ -63,10 +63,10 @@ export default async function(req: Request): Promise<Response> {
 
     // ─── Phone validation (if provided) ───
     if (phone && !isValidPhone(phone)) {
-      return Response.json({ error: 'Phone number must contain digits only (7–15 digits).' }, { status: 400 });
+      return Response.json({ error: 'Phone number must contain digits only (11 digits).' }, { status: 400 });
     }
     if (guardian_phone && !isValidPhone(guardian_phone)) {
-      return Response.json({ error: 'Guardian phone number must contain digits only (7–15 digits).' }, { status: 400 });
+      return Response.json({ error: 'Guardian phone number must contain digits only (11 digits).' }, { status: 400 });
     }
 
     // ─── Validate school exists and is active ───

@@ -1,137 +1,167 @@
-import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { useMemo } from "react";
+import { useAuth } from "@/lib/AuthContext";
+
+const ROLE_ALIASES = {
+  SAD: "super_admin",
+  ADM: "school_admin",
+  BUR: "bursar",
+  EXM: "exam_officer",
+  TEA: "teacher",
+  STU: "student",
+  PAR: "parent",
+  super_admin: "super_admin",
+  school_admin: "school_admin",
+  bursar: "bursar",
+  accountant: "bursar",
+  exam_officer: "exam_officer",
+  principal: "exam_officer",
+  teacher: "teacher",
+  student: "student",
+  parent: "parent",
+};
+
+const DEFAULT_ROLE_PERMISSIONS = {
+  super_admin: ["*"],
+  school_admin: ["*"],
+  bursar: [
+    "finance.view",
+    "finance.manage_fees",
+    "finance.assign_charges",
+    "finance.record_payment",
+    "finance.reverse_payment",
+    "finance.issue_receipts",
+    "finance.manage_gateways",
+    "students.view",
+    "announcements.view",
+  ],
+  exam_officer: [
+    "academics.view",
+    "academics.manage",
+    "results.view",
+    "results.enter",
+    "results.edit",
+    "results.approve",
+    "results.publish",
+    "grading.manage",
+    "remarks.principal",
+    "report_cards.generate",
+    "report_cards.sign",
+    "students.view",
+    "teachers.view",
+    "attendance.view",
+    "timetable.manage",
+    "announcements.manage",
+  ],
+  teacher: [
+    "academics.view",
+    "results.view",
+    "results.enter",
+    "results.edit",
+    "attendance.manage",
+    "assignments.manage",
+    "remarks.teacher",
+    "announcements.view",
+  ],
+  student: [
+    "results.view_own",
+    "report_cards.view_own",
+    "finance.view_own",
+    "finance.pay_online",
+    "assignments.submit",
+    "timetable.view",
+    "announcements.view",
+  ],
+  parent: [
+    "results.view_children",
+    "report_cards.view_children",
+    "finance.view_children",
+    "finance.pay_online",
+    "timetable.view",
+    "announcements.view",
+  ],
+};
+
+const FORBIDDEN_ROLE_PERMISSIONS = {
+  bursar: [
+    "results.enter",
+    "results.edit",
+    "results.approve",
+    "results.publish",
+    "grading.manage",
+    "remarks.principal",
+    "report_cards.sign",
+  ],
+  exam_officer: [
+    "finance.manage_fees",
+    "finance.assign_charges",
+    "finance.record_payment",
+    "finance.reverse_payment",
+    "finance.manage_gateways",
+  ],
+};
 
 /**
- * Resolves the authenticated user's active school membership and role.
- * Supports the Global User Identity model — one user can belong to multiple schools.
- *
- * Also handles auto-linking: if a user was onboarded by email (before they registered),
- * their SchoolMembership has no user_id. On first login, we search by email,
- * call the link_account backend function, and then re-fetch with user_id.
+ * Adapts Laravel's current-user response to the fields used by portal screens,
+ * including granular sub-admin roles (Bursar / Accountant, Exam Officer / Principal)
+ * and a `can(permission)` authorization helper.
  */
 export function useCurrentUser() {
-  const [user, setUser] = useState(null);
-  const [membership, setMembership] = useState(null);
-  const [school, setSchool] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { user: profile, isLoadingAuth: loading, authError: error } = useAuth();
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const me = await base44.auth.me();
-        if (!mounted) return;
+  return useMemo(() => {
+    const roleCode = profile?.role_slug || profile?.role || profile?.membership?.role;
+    const role = ROLE_ALIASES[roleCode] || "user";
 
-        // Fetch full user entity — auth.me() only returns fields set via updateMe,
-        // not custom fields set via entities.User.update (pin, must_change_password, etc.)
-        try {
-          const userEntity = await base44.entities.User.get(me.id);
-          me.data = {
-            ...(me.data || {}),
-            pin: userEntity.pin,
-            must_change_password: userEntity.must_change_password,
-            password_initialized: userEntity.password_initialized,
-            password_changed_at: userEntity.password_changed_at
-          };
-        } catch (_e) {
-          // non-fatal — custom fields may not be available
+    const rawPerms =
+      profile?.permissions ||
+      profile?.membership?.permissions ||
+      DEFAULT_ROLE_PERMISSIONS[role] ||
+      [];
+    const forbidden = FORBIDDEN_ROLE_PERMISSIONS[role] || [];
+    const permissions = rawPerms.includes("*")
+      ? ["*"]
+      : rawPerms.filter((p) => !forbidden.includes(p));
+
+    const can = (permission) => {
+      if (forbidden.includes(permission)) return false;
+      if (permissions.includes("*")) return true;
+      return permissions.includes(permission);
+    };
+
+    const membership = profile?.membership
+      ? {
+          ...profile.membership,
+          user_name: profile.full_name,
+          school_name: profile.school?.name,
+          permissions,
         }
+      : null;
 
-        setUser(me);
-
-        // Find the user's memberships by user_id
-        let memberships = [];
-        try {
-          memberships = await base44.entities.SchoolMembership.filter(
-            { user_id: me.id, status: "active" },
-            "-is_primary",
-            20
-          );
-        } catch (_e) {
-          // membership lookup may fail if entity access is restricted
+    const user = profile
+      ? {
+          ...profile,
+          permissions,
+          data: {
+            pin: profile.pin,
+            must_change_password: profile.must_change_password,
+            active_role: profile.role,
+            active_school_id: profile.active_school_id,
+          },
         }
+      : null;
 
-        // If no memberships found by user_id, try by email (auto-link flow)
-        if ((!memberships || memberships.length === 0) && me.email) {
-          try {
-            const byEmail = await base44.entities.SchoolMembership.filter(
-              { user_email: me.email.toLowerCase() },
-              "-is_primary",
-              50
-            );
-            if (byEmail && byEmail.length > 0) {
-              // Found memberships by email — link the user_id server-side
-              try {
-                await base44.functions.invoke("manageUserAccount", { action: "link_account" });
-                // Re-fetch by user_id (now should have user_id set)
-                memberships = await base44.entities.SchoolMembership.filter(
-                  { user_id: me.id, status: "active" },
-                  "-is_primary",
-                  20
-                );
-              } catch (_linkErr) {
-                // Link failed — fall back to email-based memberships
-                memberships = byEmail.filter((m) => m.status === "active" || m.status === "invited");
-              }
-            }
-          } catch (_e) {
-            // email lookup may fail
-          }
-        }
-
-        if (memberships && memberships.length > 0) {
-          const active = memberships.find((m) => m.is_primary) || memberships[0];
-          if (mounted) setMembership(active);
-
-          // Resolve the school (if not super_admin / platform-level)
-          if (active.school_id && active.role !== "super_admin") {
-            try {
-              const sch = await base44.entities.School.get(active.school_id);
-              if (mounted) setSchool(sch);
-            } catch (_e) {
-              // school may not be accessible yet
-            }
-          }
-
-          // Sync tenancy fields onto the User entity so RLS can enforce isolation.
-          const activeSchoolId = active.school_id || "";
-          const activeRole = active.role || "user";
-          const isSchoolAdmin = ["super_admin", "school_admin"].includes(activeRole);
-          const isSuperAdmin = activeRole === "super_admin";
-
-          const current = me.data || {};
-          const needsSync =
-            current.active_school_id !== activeSchoolId ||
-            current.active_role !== activeRole ||
-            !!current.is_school_admin !== isSchoolAdmin ||
-            !!current.is_super_admin !== isSuperAdmin;
-
-          if (needsSync) {
-            try {
-              const updated = await base44.auth.updateMe({
-                active_school_id: activeSchoolId,
-                active_role: activeRole,
-                is_school_admin: isSchoolAdmin,
-                is_super_admin: isSuperAdmin,
-              });
-              if (mounted && updated) setUser({ ...me, data: { ...current, ...updated } });
-            } catch (_e) {
-              // non-fatal: RLS may use stale context until next sync
-            }
-          }
-        }
-      } catch (err) {
-        if (mounted) setError(err);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-  const role = membership?.role || user?.data?.active_role || user?.role || "user";
-  const schoolId = membership?.school_id || user?.data?.active_school_id || "";
-
-  return { user, membership, school, role, schoolId, loading, error };
+    return {
+      user,
+      membership,
+      school: profile?.school || null,
+      role,
+      permissions,
+      can,
+      isFinanceStaff: role === "school_admin" || role === "super_admin" || role === "bursar",
+      isAcademicAdmin: role === "school_admin" || role === "super_admin" || role === "exam_officer",
+      schoolId: profile?.active_school_id || "",
+      loading,
+      error,
+    };
+  }, [profile, loading, error]);
 }

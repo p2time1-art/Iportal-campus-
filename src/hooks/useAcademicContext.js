@@ -1,40 +1,49 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 
+const contextCache = new Map();
+
 /**
  * Loads school-level academic structure: sessions, terms, classes, subjects,
- * and grading schemes. Reused across results, attendance, assignments, report cards.
+ * and grading schemes in a single batched RPC call with instant memory caching.
  */
 export function useAcademicContext(schoolId) {
-  const [sessions, setSessions] = useState([]);
-  const [terms, setTerms] = useState([]);
-  const [classes, setClasses] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [gradingSchemes, setGradingSchemes] = useState([]);
-  const [activeScheme, setActiveScheme] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const cached = schoolId ? contextCache.get(String(schoolId)) : null;
+
+  const [sessions, setSessions] = useState(cached?.sessions || []);
+  const [terms, setTerms] = useState(cached?.terms || []);
+  const [classes, setClasses] = useState(cached?.classes || []);
+  const [subjects, setSubjects] = useState(cached?.subjects || []);
+  const [gradingSchemes, setGradingSchemes] = useState(cached?.gradingSchemes || []);
+  const [activeScheme, setActiveScheme] = useState(cached?.activeScheme || null);
+  const [loading, setLoading] = useState(!cached);
 
   useEffect(() => {
     if (!schoolId) return;
     let mounted = true;
     (async () => {
       try {
-        const [s, t, c, sub, gs] = await Promise.all([
-          base44.entities.AcademicSession.filter({ school_id: schoolId }, "-is_active", 50),
-          base44.entities.Term.filter({ school_id: schoolId }, "-created_date", 100),
-          base44.entities.SchoolClass.filter({ school_id: schoolId }, "-created_date", 200),
-          base44.entities.Subject.filter({ school_id: schoolId }, "-created_date", 200),
-          base44.entities.GradingScheme.filter({ school_id: schoolId }, "-created_date", 50)
-        ]);
+        const res = await base44.functions.invoke("getAcademicContext", { school_id: schoolId });
+        const data = res?.data || res || {};
+        const s = data.sessions || [];
+        const t = data.terms || [];
+        const c = (data.classes || []).filter((cl) => cl.status === "active");
+        const sub = (data.subjects || []).filter((su) => su.status === "active");
+        const gs = data.grading_schemes || [];
+        const active = gs.find((g) => g.is_active) || null;
+
+        const bundle = { sessions: s, terms: t, classes: c, subjects: sub, gradingSchemes: gs, activeScheme: active };
+        contextCache.set(String(schoolId), bundle);
+
         if (!mounted) return;
-        setSessions(s || []);
-        setTerms(t || []);
-        setClasses((c || []).filter((cl) => cl.status === "active"));
-        setSubjects((sub || []).filter((su) => su.status === "active"));
-        setGradingSchemes(gs || []);
-        setActiveScheme((gs || []).find((g) => g.is_active) || null);
+        setSessions(s);
+        setTerms(t);
+        setClasses(c);
+        setSubjects(sub);
+        setGradingSchemes(gs);
+        setActiveScheme(active);
       } catch (_e) {
-        // non-fatal
+        // Fallback if RPC not available
       } finally {
         if (mounted) setLoading(false);
       }

@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-export default function KPICard({ icon: Icon, label, value, sub, trend, color = "indigo" }) {
+export default function KPICard({ icon: Icon, label, value, sub = "", trend = undefined, color = "indigo" }) {
   const colorMap = {
     indigo: "from-[hsl(243_75%_59%)] to-[hsl(263_70%_50%)]",
     navy: "from-[hsl(222_47%_11%)] to-[hsl(222_40%_25%)]",

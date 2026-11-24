@@ -6,6 +6,7 @@ import SearchInput from "@/components/admin/SearchInput";
 import EmptyState from "@/components/admin/EmptyState";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import AnnouncementFormDrawer from "@/components/communication/AnnouncementFormDrawer";
+import NotificationPipelinePanel from "@/components/communication/NotificationPipelinePanel";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAcademicContext } from "@/hooks/useAcademicContext";
 import { getAudienceLabel, formatAnnouncementDate, isExpired, isScheduled } from "@/lib/announcements";
@@ -139,12 +140,14 @@ export default function AnnouncementAdminView() {
   return (
     <div>
       <AdminPageHeader
-        title="Announcements"
-        subtitle="Create and manage school-wide communications"
+        title="Announcements & Notification Pipeline"
+        subtitle="Create school-wide announcements and dispatch asynchronous Email, Bulk SMS, WhatsApp, and PDF compilation jobs."
         actionLabel="Create Announcement"
         onAction={handleCreate}
         icon={Megaphone}
       />
+
+      <NotificationPipelinePanel />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-5">

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { authApi } from "@/api/auth";
+import { useAuth } from "@/lib/AuthContext";
 import { Loader2, Lock, Eye, EyeOff, CheckCircle2, AlertCircle, KeyRound } from "lucide-react";
 
 export default function ChangePasswordForm({ onSuccess }) {
   const { user } = useCurrentUser();
+  const { checkUserAuth } = useAuth();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,8 +24,8 @@ export default function ChangePasswordForm({ onSuccess }) {
       setError("All fields are required.");
       return;
     }
-    if (newPassword.length < 6) {
-      setError("New password must be at least 6 characters long.");
+    if (newPassword.length < 8) {
+      setError("New password must be at least 8 characters long.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -34,34 +36,22 @@ export default function ChangePasswordForm({ onSuccess }) {
       setError("New password must be different from your current password.");
       return;
     }
-
     setLoading(true);
     try {
-      await base44.auth.changePassword({
-        userId: user.id,
-        currentPassword,
-        newPassword,
+      await authApi.changePassword({
+        current_password: currentPassword,
+        password: newPassword,
+        password_confirmation: confirmPassword,
       });
 
-      // Clear the must_change_password flag and record the change timestamp.
-      // The PIN remains the user's platform identifier — only the auth password changes.
-      await base44.auth.updateMe({
-        must_change_password: false,
-        password_changed_at: new Date().toISOString(),
-      });
-
+      await checkUserAuth();
       setSuccess(true);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       if (onSuccess) setTimeout(() => onSuccess(), 1200);
     } catch (err) {
-      const msg =
-        err?.response?.data?.error ||
-        err?.data?.error ||
-        err?.message ||
-        "Failed to change password. Please check your current password and try again.";
-      setError(msg);
+      setError(err.message || "Failed to change password. Please check your current password and try again.");
     } finally {
       setLoading(false);
     }
@@ -104,7 +94,7 @@ export default function ChangePasswordForm({ onSuccess }) {
           </button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Use your platform PIN (e.g., GR-STU-JD4827) if you haven't changed your password yet.
+          Enter your current account password.
         </p>
       </div>
 

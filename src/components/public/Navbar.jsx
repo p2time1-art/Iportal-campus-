@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, GraduationCap } from "lucide-react";
+import { useTenantBranding } from "@/lib/schoolTheme";
 
 const navItems = [
   { label: "Home", path: "/" },
@@ -62,6 +63,11 @@ export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const school = useTenantBranding();
+
+  const headerLogo = school?.logo_url || school?.crest_url || "";
+  const headerName = school?.name?.trim() || "";
+  const headerMotto = school?.motto?.trim() || "";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -79,17 +85,31 @@ export default function Navbar() {
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-[68px]">
-          {/* Logo */}
+          {/* Logo (Dynamic School Branding in Header Section Only) */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-[#0a0b4d] flex items-center justify-center shadow-md">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
+            {headerLogo ? (
+              <img
+                src={headerLogo}
+                alt={headerName || "School Logo"}
+                className="w-9 h-9 rounded-xl object-contain bg-white border border-slate-100 shadow-sm p-0.5"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-xl bg-[hsl(var(--brand-navy))] flex items-center justify-center shadow-md">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+            )}
             <div className="leading-none">
-              <span className="block font-heading font-extrabold text-[15px] text-[#0a0b4d] tracking-tight">
-                iPortal<span className="text-[#f97316]"> Campus</span>
+              <span className="block font-heading font-extrabold text-[15px] text-[hsl(var(--brand-navy))] tracking-tight">
+                {headerName ? (
+                  headerName
+                ) : (
+                  <>
+                    iPortal<span className="text-[hsl(var(--brand-orange))]"> Campus</span>
+                  </>
+                )}
               </span>
-              <span className="hidden sm:block text-[10px] font-medium text-slate-400 tracking-wide uppercase">
-                Modern · Smart · Secure
+              <span className="hidden sm:block text-[10px] font-medium text-slate-400 tracking-wide uppercase mt-0.5">
+                {headerMotto || "Modern · Smart · Secure"}
               </span>
             </div>
           </Link>

@@ -92,7 +92,7 @@ export default function AnnouncementFormDrawer({ open, onClose, onSave, announce
     setSaving(true);
     setError("");
     try {
-      const targetClass = classes.find((c) => c.id === form.target_class_id);
+      const targetClass = classes.find((c) => String(c.id) === String(form.target_class_id));
       const publishAt = form.publish_now ? null : new Date(form.publish_at).toISOString();
       const expiresAt = form.expires_at ? new Date(form.expires_at).toISOString() : null;
 

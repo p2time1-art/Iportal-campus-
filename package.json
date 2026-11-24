@@ -1,10 +1,11 @@
 {
-  "name": "base44-app",
+  "name": "iportal-campus",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "api": "cd laravel-api && php artisan serve --port=8000",
     "build": "vite build",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
@@ -12,8 +13,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@base44/sdk": "^0.8.48",
-    "@base44/vite-plugin": "^1.0.36",
     "@hello-pangea/dnd": "^17.0.0",
     "@hookform/resolvers": "^4.1.2",
     "@radix-ui/react-accordion": "^1.2.3",

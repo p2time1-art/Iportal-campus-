@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import PublicPageLayout from "./PublicPageLayout";
 import LoginCard from "./LoginCard";
 
 export default function AccountAccessPage({ title, subtitle, redirectTo, icon: Icon }) {
-  const [authed, setAuthed] = useState(null);
+  const { isAuthenticated, isLoadingAuth } = useAuth();
 
-  useEffect(() => {
-    base44.auth.isAuthenticated().then(setAuthed);
-  }, []);
-
-  if (authed === null) {
+  if (isLoadingAuth) {
     return (
       <PublicPageLayout>
         <div className="flex justify-center py-20">
@@ -21,7 +17,7 @@ export default function AccountAccessPage({ title, subtitle, redirectTo, icon: I
     );
   }
 
-  if (authed) return <Navigate to={redirectTo} replace />;
+  if (isAuthenticated) return <Navigate to={redirectTo} replace />;
 
   return (
     <PublicPageLayout>

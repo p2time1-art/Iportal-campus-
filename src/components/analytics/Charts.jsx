@@ -1,5 +1,5 @@
 import React from "react";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area, Legend } from "recharts";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
 
 const COLORS = ["hsl(243 75% 59%)", "hsl(25 95% 53%)", "hsl(142 71% 45%)", "hsl(263 70% 50%)", "hsl(200 80% 50%)", "hsl(0 84% 60%)", "hsl(280 50% 50%)", "hsl(30 80% 50%)"];
 

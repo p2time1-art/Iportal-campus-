@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-export default function ChartCard({ title, icon: Icon, children, className, action }) {
+export default function ChartCard({ title, icon: Icon, children, className = "", action = undefined }) {
   return (
     <div className={cn("bg-card rounded-2xl border border-border/60 shadow-sm p-5", className)}>
       <div className="flex items-center justify-between mb-4">

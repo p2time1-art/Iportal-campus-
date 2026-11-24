@@ -1,7 +1,7 @@
 import React from "react";
 import { Plus } from "lucide-react";
 
-export default function EmptyState({ icon: Icon, title, description, actionLabel, onAction }) {
+export default function EmptyState({ icon: Icon, title, description = "", actionLabel = "", onAction = undefined }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-4">

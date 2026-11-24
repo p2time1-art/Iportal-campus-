@@ -1,44 +1,41 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Eye, EyeOff, Lock, User, Loader2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Lock, User, Loader2, AlertCircle } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAuth } from "@/lib/AuthContext";
+import { applyLaravelValidationErrors } from "@/lib/laravelValidation";
+
+const loginPinSchema = z.object({
+  pin: z.string().trim().min(1, "Please enter your Login PIN or Email"),
+  password: z.string().min(1, "Please enter your password"),
+});
 
 export default function LoginCard({ compact = false }) {
-  const [pin, setPin] = useState("");
-  const [password, setPassword] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [serverError, setServerError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!pin.trim() || !password) {
-      setError("Please enter your Login PIN and Password.");
-      return;
-    }
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(loginPinSchema),
+    defaultValues: { pin: "", password: "" },
+  });
+
+  const onSubmit = async (values) => {
+    setServerError("");
     try {
-      // 1. Resolve the Login PIN to the user's email + role context
-      const res = await base44.functions.invoke("resolveLoginPin", { login_pin: pin.trim() });
-      const { email } = res.data;
-      if (!email) {
-        setError("Unable to resolve your Login PIN. Please contact your school administrator.");
-        setLoading(false);
-        return;
-      }
-      // 2. Authenticate with the resolved email + password (verified by the auth backend)
-      await base44.auth.loginViaEmailPassword(email, password);
-      // Hard redirect to dashboard (auth provider re-initializes)
-      window.location.href = "/";
+      await login({ pin: values.pin.trim(), password: values.password });
+      navigate("/app", { replace: true });
     } catch (err) {
-      const msg =
-        err?.response?.data?.error ||
-        err?.data?.error ||
-        err?.message ||
-        "Invalid Login PIN or Password. Please try again.";
-      setError(msg);
-      setLoading(false);
+      const msg = applyLaravelValidationErrors(err, setError);
+      setServerError(msg || "Invalid Login PIN or Password. Please try again.");
     }
   };
 
@@ -54,7 +51,7 @@ export default function LoginCard({ compact = false }) {
           <p className="text-sm text-slate-500 mt-1.5">Access your portal using your login PIN and password.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           {/* Login PIN */}
           <div className="space-y-1.5">
             <label htmlFor="login-pin" className="text-[13px] font-semibold text-[#0f172a]">
@@ -65,13 +62,19 @@ export default function LoginCard({ compact = false }) {
               <input
                 id="login-pin"
                 type="text"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
+                {...register("pin")}
                 placeholder="Enter your login PIN"
-                className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50/50 text-[#0f172a] placeholder:text-slate-400 text-sm focus:outline-none focus:border-[#0f172a] focus:bg-white transition-colors"
+                className={`w-full h-12 pl-10 pr-4 rounded-xl border ${
+                  errors.pin ? "border-red-400 bg-red-50/30" : "border-slate-200 bg-slate-50/50"
+                } text-[#0f172a] placeholder:text-slate-400 text-sm focus:outline-none focus:border-[#0f172a] focus:bg-white transition-colors`}
                 autoComplete="username"
               />
             </div>
+            {errors.pin && (
+              <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.pin.message}
+              </p>
+            )}
           </div>
 
           {/* Password */}
@@ -84,10 +87,11 @@ export default function LoginCard({ compact = false }) {
               <input
                 id="login-password"
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
                 placeholder="Enter your password"
-                className="w-full h-12 pl-10 pr-11 rounded-xl border border-slate-200 bg-slate-50/50 text-[#0f172a] placeholder:text-slate-400 text-sm focus:outline-none focus:border-[#0f172a] focus:bg-white transition-colors"
+                className={`w-full h-12 pl-10 pr-11 rounded-xl border ${
+                  errors.password ? "border-red-400 bg-red-50/30" : "border-slate-200 bg-slate-50/50"
+                } text-[#0f172a] placeholder:text-slate-400 text-sm focus:outline-none focus:border-[#0f172a] focus:bg-white transition-colors`}
                 autoComplete="current-password"
               />
               <button
@@ -99,23 +103,32 @@ export default function LoginCard({ compact = false }) {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.password.message}
+              </p>
+            )}
           </div>
 
-          {error && (
+          {serverError && !errors.pin && !errors.password && (
             <div className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5">
-              {error}
+              {serverError}
             </div>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="w-full h-12 rounded-xl bg-[#0f172a] hover:bg-[#0f172a]/90 text-white font-semibold text-sm transition-all shadow-lg shadow-[#0f172a]/20 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Signing in…
+              </>
             ) : (
-              <><Lock className="w-4 h-4" /> Login</>
+              <>
+                <Lock className="w-4 h-4" /> Login
+              </>
             )}
           </button>
         </form>

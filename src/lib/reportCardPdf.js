@@ -4,10 +4,13 @@
  * reliable text rendering and small file size.
  */
 import { jsPDF } from "jspdf";
+import { downloadOfficialReportCardPdf, drawQrMatrixOnPdf, computeClientVerificationCode } from "@/lib/documentEngine";
 
-export function generateReportCardPdf({
+export async function generateReportCardPdf({
   school,
   student,
+  sessionId,
+  termId,
   sessionName,
   termName,
   results,
@@ -15,7 +18,25 @@ export function generateReportCardPdf({
   remark,
   attendance,
   scheme,
+  template = "classic",
+  transcript = false,
 }) {
+  if (student?.id) {
+    try {
+      await downloadOfficialReportCardPdf({
+        studentId: student.id,
+        sessionId,
+        termId,
+        template,
+        transcript,
+        studentName: student.full_name || "Student",
+      });
+      return;
+    } catch (_err) {
+      // Fallback to client-side jsPDF below
+    }
+  }
+
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = 210;
   const pageH = 297;
@@ -23,15 +44,22 @@ export function generateReportCardPdf({
   const contentW = pageW - margin * 2;
   let y = margin;
 
-  // ---- School header ----
+  // ---- School header (with custom school branding color & motto) ----
+  const hex = (school?.primary_color || "#0f172a").replace("#", "");
+  const rCol = parseInt(hex.substring(0, 2), 16) || 15;
+  const gCol = parseInt(hex.substring(2, 4), 16) || 23;
+  const bCol = parseInt(hex.substring(4, 6), 16) || 42;
+
+  doc.setTextColor(rCol, gCol, bCol);
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
   doc.text(school?.name || "School", margin, y + 6);
+  doc.setTextColor(0, 0, 0);
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  const contactParts = [school?.address, school?.city, school?.country].filter(Boolean);
-  if (contactParts.length) doc.text(contactParts.join(", "), margin, y + 11);
+  const contactParts = [school?.motto ? `"${school.motto}"` : null, school?.address, school?.city, school?.country].filter(Boolean);
+  if (contactParts.length) doc.text(contactParts.join(" · "), margin, y + 11);
   const phoneEmail = [school?.phone, school?.email].filter(Boolean);
   if (phoneEmail.length) doc.text(phoneEmail.join("  |  "), margin, y + 15);
 

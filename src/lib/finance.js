@@ -63,13 +63,39 @@ export const ONLINE_TXN_STATUS_STYLES = {
 
 export const GATEWAY_LABELS = {
   paystack: 'Paystack',
-  flutterwave: 'Flutterwave'
+  flutterwave: 'Flutterwave',
+  monnify: 'Monnify',
+  remita: 'Remita'
 };
 
 export const GATEWAY_BADGE_STYLES = {
   paystack: 'bg-[hsl(var(--brand-indigo))]/10 text-[hsl(var(--brand-indigo))]',
-  flutterwave: 'bg-[hsl(var(--brand-orange))]/10 text-[hsl(var(--brand-orange))]'
+  flutterwave: 'bg-[hsl(var(--brand-orange))]/10 text-[hsl(var(--brand-orange))]',
+  monnify: 'bg-emerald-100 text-emerald-700',
+  remita: 'bg-amber-100 text-amber-800'
 };
+
+export function computeConvenienceFee(baseAmount, gateway = 'paystack', platformFee = 100) {
+  const base = Math.max(0, Number(baseAmount) || 0);
+  if (base <= 0) {
+    return { baseAmount: 0, gatewayFee: 0, platformFee: 0, convenienceFee: 0, totalPayable: 0 };
+  }
+  const gw = String(gateway || 'paystack').toLowerCase();
+  let gatewayFee = 0;
+  if (gw === 'flutterwave') {
+    gatewayFee = Math.min(2000, Math.round(base * 0.014 * 100) / 100);
+  } else if (gw === 'monnify') {
+    gatewayFee = Math.min(2000, Math.round(base * 0.015 * 100) / 100);
+  } else if (gw === 'remita') {
+    gatewayFee = Math.min(2500, Math.round(base * 0.015 * 100) / 100);
+  } else {
+    gatewayFee = Math.min(2000, Math.round(((base * 0.015) + (base >= 2500 ? 100 : 0)) * 100) / 100);
+  }
+  const plat = Math.max(0, Number(platformFee) || 100);
+  const convenienceFee = Math.round((gatewayFee + plat) * 100) / 100;
+  const totalPayable = Math.round((base + convenienceFee) * 100) / 100;
+  return { baseAmount: base, gatewayFee, platformFee: plat, convenienceFee, totalPayable };
+}
 
 export function formatStatusLabel(status) {
   return (status || '').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');

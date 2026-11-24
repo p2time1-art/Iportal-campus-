@@ -52,7 +52,7 @@ export default function OnboardExistingDialog({ open, onClose, profile, role, on
         // If the user doesn't exist yet, send an invite
         if (data.needs_invite) {
           try {
-            await base44.users.inviteUser(email.trim().toLowerCase(), "user");
+            await base44.auth.inviteUser(email.trim().toLowerCase(), "user");
           } catch (_e) {
             // Invite may fail — the PIN is still generated, admin can share manually
           }

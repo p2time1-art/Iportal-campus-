@@ -1,7 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 
-export default function FormDrawer({ open, onClose, title, description, children, footer }) {
+export default function FormDrawer({ open, onClose, title, description = "", children, footer = undefined }) {
   if (!open) return null;
   return (
     <>

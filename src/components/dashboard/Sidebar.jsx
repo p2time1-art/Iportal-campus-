@@ -1,19 +1,63 @@
-import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import React from "react";
+import { NavLink } from "react-router-dom";
 import { GraduationCap, LogOut, X, ChevronRight } from "lucide-react";
 import { navConfig } from "./navConfig";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { base44 } from "@/api/base44Client";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
+import { usePlatformSettings } from "@/lib/schoolTheme";
+import { useAuth } from "@/lib/AuthContext";
 import { cn } from "@/lib/utils";
 
+const PATH_FEATURE_MAP = {
+  "/app/parents": "parents",
+  "/app/admissions": "admissions_portal",
+  "/app/timetable": "timetable",
+  "/app/assignments": "assignments",
+  "/app/report-card": "pdf_documents",
+  "/app/online-payments": "online_payments",
+  "/app/pay-fees": "online_payments",
+  "/app/analytics": "analytics",
+  "/app/teacher/analytics": "analytics",
+  "/app/my-analytics": "analytics",
+};
+
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
-  const { user, membership, school, role } = useCurrentUser();
-  const navigate = useNavigate();
+  const { user, membership, school, schoolId, role } = useCurrentUser();
+  const isSuperAdmin = role === "super_admin";
+  const platformSettings = usePlatformSettings({ enabled: isSuperAdmin });
+  const { isFeatureEnabled } = useFeatureFlags(isSuperAdmin ? null : schoolId);
+  const { logout } = useAuth();
   const config = navConfig[role] || navConfig.student;
 
+  const brandLogo = isSuperAdmin
+    ? (platformSettings?.logo_url || "")
+    : (school?.logo_url || school?.crest_url || "");
+  const brandTitle = isSuperAdmin
+    ? (platformSettings?.platform_name || "")
+    : (school?.name || "");
+  const brandSubtitle = isSuperAdmin
+    ? (platformSettings?.tagline || config.label)
+    : (school?.motto || config.label);
+  const brandAccent = isSuperAdmin
+    ? platformSettings?.accent_color
+    : school?.accent_color;
+
+  const visibleGroups = config.groups
+    .map((group) => ({
+      ...group,
+      items: (group.items || []).filter((item) => {
+        if (role === "super_admin") return true;
+        const itemKey = item.featureKey;
+        const pathKey = PATH_FEATURE_MAP[item.path];
+        if (itemKey && !isFeatureEnabled(itemKey)) return false;
+        if (pathKey && !isFeatureEnabled(pathKey)) return false;
+        return true;
+      }),
+    }))
+    .filter((group) => group.items.length > 0);
+
   const handleLogout = async () => {
-    await base44.auth.logout();
-    window.location.href = "/";
+    await logout();
   };
 
   const displayName = membership?.user_name || user?.full_name || user?.email || "User";
@@ -38,15 +82,34 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       >
         {/* Brand */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-[hsl(var(--sidebar-border))] shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(243_75%_59%)] to-[hsl(263_70%_50%)] flex items-center justify-center shadow-md">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
-            <div className="leading-none">
-              <span className="block font-heading font-extrabold text-sm text-white tracking-tight">
-                iPortal<span className="text-[hsl(243_75%_70%)]"> Campus</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            {brandLogo ? (
+              <img
+                src={brandLogo}
+                alt={brandTitle || schoolName}
+                className="w-9 h-9 rounded-xl object-contain bg-white p-0.5 shadow-md shrink-0"
+              />
+            ) : (
+              <div
+                className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(243_75%_59%)] to-[hsl(263_70%_50%)] flex items-center justify-center shadow-md shrink-0"
+                style={brandAccent ? { background: brandAccent } : undefined}
+              >
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+            )}
+            <div className="leading-none min-w-0">
+              <span className="block font-heading font-extrabold text-sm text-white tracking-tight truncate">
+                {brandTitle ? (
+                  brandTitle
+                ) : (
+                  <>
+                    iPortal<span className="text-[hsl(243_75%_70%)]"> Campus</span>
+                  </>
+                )}
               </span>
-              <span className="text-[10px] text-white/40 tracking-wide uppercase">{config.label}</span>
+              <span className="text-[10px] text-white/40 tracking-wide uppercase block truncate mt-0.5">
+                {brandSubtitle}
+              </span>
             </div>
           </div>
           <button
@@ -67,7 +130,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-4 space-y-4">
-          {config.groups.map((group, gi) => (
+          {visibleGroups.map((group, gi) => (
             <div key={gi} className="space-y-0.5">
               {group.label && (
                 <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-white/35">
@@ -105,17 +168,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           ))}
         </nav>
 
-        {/* User + logout */}
+        {/* Logout */}
         <div className="border-t border-[hsl(var(--sidebar-border))] p-3 shrink-0">
-          <div className="flex items-center gap-3 px-2 py-2 mb-2">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[hsl(243_75%_59%)] to-[hsl(263_70%_50%)] flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {initials || "U"}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white truncate">{displayName}</p>
-              <p className="text-xs text-white/40 truncate">{user?.email}</p>
-            </div>
-          </div>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-red-500/15 transition-colors"

@@ -3,10 +3,10 @@ import { Pin, Megaphone, Paperclip, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAudienceLabel, formatAnnouncementDateTime, isExpired, isScheduled } from "@/lib/announcements";
 
-export default function AnnouncementCard({ announcement, isRead = true, onClick }) {
+export default function AnnouncementCard({ announcement, isRead = true, onClick = undefined }) {
   const expired = isExpired(announcement);
   const scheduled = isScheduled(announcement);
-  const CardTag = onClick ? "button" : Link;
+  const CardTag = /** @type {any} */ (onClick ? "button" : Link);
   const cardProps = onClick
     ? { onClick }
     : { to: `/app/announcements/${announcement.id}` };

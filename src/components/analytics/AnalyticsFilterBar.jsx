@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function AnalyticsFilterBar({ sessions, terms, classes, subjects, filters, onFilterChange, showClass = true, showSubject = true }) {
+export default function AnalyticsFilterBar({ sessions, terms, classes = [], subjects = [], filters, onFilterChange, showClass = true, showSubject = true }) {
   const update = (key, value) => onFilterChange({ ...filters, [key]: value || "" });
 
   const filteredTerms = (terms || []).filter(t => !filters.session_id || t.session_id === filters.session_id);

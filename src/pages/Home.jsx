@@ -18,8 +18,7 @@ export default function Home() {
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25 lg:opacity-100"
             style={{
-              backgroundImage:
-                "url('https://media.base44.com/images/public/6a8f5b3097375e1ebc98213e/be3f683e2_file_00000000efa8821089f29701e28dfd44.png')",
+              backgroundImage: "url('/hero_image.png')",
               WebkitMaskImage:
                 "linear-gradient(100deg, transparent 0%, transparent 16%, rgba(0,0,0,0.95) 42%, #000 100%)",
               maskImage:

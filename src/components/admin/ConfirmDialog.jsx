@@ -1,7 +1,7 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
 
-export default function ConfirmDialog({ open, onClose, onConfirm, title, message, confirmLabel = "Delete", loading, loadingLabel = "Deleting…", error }) {
+export default function ConfirmDialog({ open, onClose, onConfirm, title, message, confirmLabel = "Delete", loading = false, loadingLabel = "Deleting…", error = "", icon: Icon = AlertTriangle }) {
   if (!open) return null;
   return (
     <>
@@ -11,7 +11,7 @@ export default function ConfirmDialog({ open, onClose, onConfirm, title, message
           <div className="p-5">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <Icon className="w-5 h-5 text-red-600" />
               </div>
               <div>
                 <h3 className="font-heading font-bold text-base text-foreground">{title}</h3>

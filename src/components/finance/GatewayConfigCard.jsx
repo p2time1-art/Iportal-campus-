@@ -9,7 +9,8 @@ export default function GatewayConfigCard() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
-  const webhookUrl = "https://iportal.base44.app/functions/handlePaystackWebhook";
+  const activeGw = config?.gateway || "paystack";
+  const webhookUrl = `${window.location.origin}/api/v1/webhooks/${activeGw}`;
 
   useEffect(() => {
     if (!schoolId) return;
@@ -56,7 +57,11 @@ export default function GatewayConfigCard() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Gateway:</span>
-            <span className="text-xs font-semibold text-foreground">Paystack</span>
+            <span className="text-xs font-semibold text-foreground capitalize">{config.gateway || "Paystack"}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Platform Split Fee:</span>
+            <span className="text-xs font-semibold text-foreground">₦{Number(config.platform_fee ?? 100).toLocaleString()}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Environment:</span>

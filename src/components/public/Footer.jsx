@@ -8,11 +8,12 @@ export default function Footer() {
           <p className="text-xs text-white/55">
             © {new Date().getFullYear()} iPortal Campus. All rights reserved.
           </p>
+          
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-white/55">Powered by</span>
+            <span className="text-xs text-white/55">Designed by</span>
             <span className="font-heading font-extrabold text-sm tracking-tight text-[#f97316]">
-              APrime
-            </span>
+              <a href="https://www.aprimedesignshub.com/">Aprime Designs Hub</a>
+            </span> 
           </div>
         </div>
       </div>

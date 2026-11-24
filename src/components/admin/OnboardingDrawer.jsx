@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Loader2, KeyRound, CheckCircle2, Mail, UserPlus, GraduationCap, Users, BookOpen } from "lucide-react";
+import { Loader2, KeyRound, CheckCircle2, Mail, UserPlus, GraduationCap, Users, BookOpen, Wallet, Award } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import FormDrawer from "@/components/admin/FormDrawer";
 
@@ -7,6 +7,8 @@ const inputCls = "w-full h-10 px-3 rounded-lg border border-border bg-white text
 const labelCls = "text-sm font-semibold text-foreground mb-1.5 block";
 const roleTabs = [
   { key: "teacher", label: "Teacher", icon: BookOpen },
+  { key: "bursar", label: "Bursar / Acct", icon: Wallet },
+  { key: "exam_officer", label: "Exam Officer", icon: Award },
   { key: "student", label: "Student", icon: GraduationCap },
   { key: "parent", label: "Parent", icon: Users },
 ];
@@ -44,7 +46,7 @@ export default function OnboardingDrawer({ open, onClose, schoolId, schoolName, 
   const validate = () => {
     if (!form.email.trim()) return "Email is required.";
     if (!form.full_name.trim()) return "Full name is required.";
-    if (role === "teacher" && !form.staff_id.trim()) return "Staff ID is required.";
+    if (["teacher", "bursar", "exam_officer"].includes(role) && !form.staff_id.trim()) return "Staff ID is required.";
     if (role === "student" && !form.admission_number.trim()) return "Admission number is required.";
     if (role === "parent" && (!form.phone || !form.phone.trim())) return "Phone is required for parents.";
     return null;
@@ -88,7 +90,7 @@ export default function OnboardingDrawer({ open, onClose, schoolId, schoolName, 
         setResult(data);
         setStep("result");
         if (data.needs_invite) {
-          try { await base44.users.inviteUser(form.email.trim().toLowerCase(), "user"); } catch (_e) {}
+          try { await base44.auth.inviteUser(form.email.trim().toLowerCase(), "user"); } catch (_e) {}
         }
         if (onDone) onDone();
       }
@@ -180,7 +182,7 @@ export default function OnboardingDrawer({ open, onClose, schoolId, schoolName, 
           </div>
 
           {/* Role-specific fields */}
-          {role === "teacher" && (
+          {["teacher", "bursar", "exam_officer"].includes(role) && (
             <>
               <div>
                 <label className={labelCls}>Staff ID *</label>

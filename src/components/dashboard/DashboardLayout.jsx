@@ -1,13 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { applySchoolTheme, DEFAULT_SCHOOL_COLORS, useTenantBranding, usePlatformSettings } from "@/lib/schoolTheme";
 
 export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, loading } = useCurrentUser();
+  const { user, school, role, loading } = useCurrentUser();
+  const isSuperAdmin = role === "super_admin";
+
+  // Strict theme isolation: Super Admin uses Platform Settings only; school roles use School Settings only
+  const tenantSchool = useTenantBranding({ enabled: !loading && !isSuperAdmin });
+  const platformSettings = usePlatformSettings({ enabled: !loading && isSuperAdmin });
   const location = useLocation();
+
+  useEffect(() => {
+    if (loading) return;
+    if (isSuperAdmin) {
+      applySchoolTheme(platformSettings || DEFAULT_SCHOOL_COLORS);
+    } else {
+      const target = school || tenantSchool;
+      if (target) applySchoolTheme(target);
+    }
+  }, [loading, isSuperAdmin, platformSettings, school, tenantSchool]);
 
   if (loading) {
     return (
