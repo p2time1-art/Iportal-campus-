@@ -1,0 +1,1 @@
+import{j as o,D as t}from"./index-DMyKzYyf.js";import{A as e}from"./AccountAccessPage-COEtceDF.js";import"./PublicPageLayout-DoIBN5dc.js";import"./Footer-BJzrHUEn.js";function c(){return o.jsx(e,{title:"Download Receipt",subtitle:"Log in to view your payment history and download official receipts.",redirectTo:"/app/finance",icon:t})}export{c as default};

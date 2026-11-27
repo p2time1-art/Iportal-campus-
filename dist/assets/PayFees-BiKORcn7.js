@@ -1,1 +1,0 @@
-import{j as e,o as t}from"./index-BLo__kUz.js";import{A as o}from"./AccountAccessPage-BlMsGJaW.js";import"./PublicPageLayout-DL89ym5H.js";import"./Footer-DjTYPQMe.js";function s(){return e.jsx(o,{title:"Pay Fees",subtitle:"Log in to view your fee breakdown, outstanding balance, and make secure online payments.",redirectTo:"/app/finance",icon:t})}export{s as default};

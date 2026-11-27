@@ -89,17 +89,28 @@ class TenantContext
             return $schoolId;
         }
 
-        // 2. Check slug/code header or subdomain (e.g. greenwood.iportalcampus.com)
+        // 2. Check exact Custom Domain match first (for verified/active custom domains)
+        $host = strtolower($request->getHost());
+        if (! in_array($host, ['localhost', '127.0.0.1', 'iportalcampus.com', 'www.iportalcampus.com'], true)) {
+            $byCustomDomain = School::where('metadata->custom_domain', $host)->first();
+            if ($byCustomDomain) {
+                self::setSchool($byCustomDomain);
+                return $byCustomDomain->id;
+            }
+        }
+
+        // 3. Check slug/code header or subdomain (e.g. greenwood.iportalcampus.com)
         $slug = $request->header('X-School-Slug')
             ?? $request->header('X-School-Code')
             ?? $request->query('school_slug')
             ?? self::extractSubdomain($request->getHost());
 
         if (! empty($slug)) {
+            $lowerSlug = strtolower($slug);
             $school = School::where('code', $slug)
                 ->orWhere('short_name', $slug)
-                ->orWhere('metadata->slug', strtolower($slug))
-                ->orWhere('metadata->custom_domain', strtolower($request->getHost()))
+                ->orWhere('metadata->subdomain', $lowerSlug)
+                ->orWhere('metadata->slug', $lowerSlug)
                 ->first();
 
             if ($school) {

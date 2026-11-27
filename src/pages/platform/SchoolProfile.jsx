@@ -6,6 +6,7 @@ import StatusBadge from "@/components/admin/StatusBadge";
 import EmptyState from "@/components/admin/EmptyState";
 import GatewayManagementPanel from "@/components/platform/GatewayManagementPanel";
 import FeatureFlagsPanel from "@/components/platform/FeatureFlagsPanel";
+import SchoolDomainPanel from "@/components/platform/SchoolDomainPanel";
 
 export default function SchoolProfile() {
   const { schoolId } = useParams();
@@ -79,6 +80,7 @@ export default function SchoolProfile() {
 
   const infoItems = [
     { label: "School Code", value: school.school_code || school.short_name || "—" },
+    { label: "Portal URL", value: <span className="font-mono text-xs text-[hsl(var(--brand-indigo))]">{school.portal_url || school.subdomain_url || "—"}</span> },
     { label: "Email", value: school.email || "—" },
     { label: "Phone", value: school.phone || "—" },
     { label: "Website", value: school.website || "—" },
@@ -202,6 +204,9 @@ export default function SchoolProfile() {
           )}
         </div>
       </div>
+
+      {/* Portal Subdomain & Custom Domain Assignment */}
+      <SchoolDomainPanel school={school} onUpdated={(updated) => setSchool(updated)} />
 
       {/* Payment Gateway Management */}
       <GatewayManagementPanel schoolId={schoolId} schoolName={school.name} />

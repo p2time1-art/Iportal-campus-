@@ -6,7 +6,8 @@ export default function SchoolFormDrawer({ open, onClose, onSaved, school }) {
   const [form, setForm] = useState({
     name: "", school_code: "", short_name: "", motto: "",
     address: "", city: "", country: "", phone: "", email: "", website: "",
-    logo_url: "", status: "active", plan: "basic"
+    logo_url: "", status: "active", plan: "basic",
+    subdomain: "", custom_domain: "", domain_status: "active"
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -20,13 +21,17 @@ export default function SchoolFormDrawer({ open, onClose, onSaved, school }) {
         country: school.country || "", phone: school.phone || "",
         email: school.email || "", website: school.website || "",
         logo_url: school.logo_url || "", status: school.status || "active",
-        plan: school.plan || "basic"
+        plan: school.plan || "basic",
+        subdomain: school.subdomain || school.slug || "",
+        custom_domain: school.custom_domain || "",
+        domain_status: school.domain_status || (school.custom_domain ? "pending_dns" : "active")
       });
     } else {
       setForm({
         name: "", school_code: "", short_name: "", motto: "",
         address: "", city: "", country: "", phone: "", email: "", website: "",
-        logo_url: "", status: "active", plan: "basic"
+        logo_url: "", status: "active", plan: "basic",
+        subdomain: "", custom_domain: "", domain_status: "active"
       });
     }
     setError("");
@@ -39,10 +44,13 @@ export default function SchoolFormDrawer({ open, onClose, onSaved, school }) {
     setSaving(true);
     setError("");
     try {
-      await onSaved(form);
+      await onSaved({
+        ...form,
+        slug: form.subdomain || undefined,
+      });
       onClose();
     } catch (e) {
-      setError(e.message || "Failed to save school");
+      setError(e?.response?.data?.error || e?.data?.error || e?.message || "Failed to save school");
     } finally {
       setSaving(false);
     }
@@ -134,6 +142,62 @@ export default function SchoolFormDrawer({ open, onClose, onSaved, school }) {
               <option value="basic">Basic</option>
               <option value="premium">Premium</option>
             </select>
+          </div>
+        </div>
+
+        {/* Super Admin Portal Domain Assignment */}
+        <div className="pt-4 border-t border-border/60 space-y-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-[hsl(var(--brand-indigo))]">
+              Portal Domain &amp; Routing
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Assign a unique platform subdomain and optional custom domain for this school.
+            </p>
+          </div>
+          <div>
+            <label className={labelCls}>Subdomain</label>
+            <div className="flex items-center">
+              <input
+                className="w-full h-10 px-3 rounded-l-lg bg-white border border-border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-indigo))]/30"
+                value={form.subdomain}
+                onChange={e => set("subdomain", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                placeholder="e.g. gracefield"
+              />
+              <span className="h-10 px-3 inline-flex items-center bg-slate-100 border border-l-0 border-border rounded-r-lg text-xs text-muted-foreground font-mono shrink-0">
+                .iportalcampus.com
+              </span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Custom Domain (Optional)</label>
+              <input
+                className={inputCls + " font-mono"}
+                value={form.custom_domain}
+                onChange={e => {
+                  const val = e.target.value.toLowerCase().trim();
+                  setForm(f => ({
+                    ...f,
+                    custom_domain: val,
+                    domain_status: val && !f.custom_domain ? "pending_dns" : f.domain_status
+                  }));
+                }}
+                placeholder="portal.schoolname.edu.ng"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Domain Status</label>
+              <select
+                className={inputCls}
+                value={form.domain_status}
+                onChange={e => set("domain_status", e.target.value)}
+              >
+                <option value="pending_dns">Pending DNS</option>
+                <option value="verified">Verified</option>
+                <option value="active">Active</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

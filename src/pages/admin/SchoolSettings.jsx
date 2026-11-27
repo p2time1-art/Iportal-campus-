@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAuth } from "@/lib/AuthContext";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import { Settings, Save, Loader2, CheckCircle2, Palette, Globe, Crown, Upload, RotateCcw } from "lucide-react";
+import { Settings, Save, Loader2, CheckCircle2, Palette, Globe, Crown, Upload, RotateCcw, Copy, Lock, ExternalLink } from "lucide-react";
 import { DEFAULT_SCHOOL_COLORS, applySchoolTheme, notifySchoolBrandingUpdated } from "@/lib/schoolTheme";
 
 const inputCls = "w-full h-10 px-3 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand-indigo))]/30";
@@ -16,7 +16,8 @@ export default function SchoolSettings() {
     name: "", short_name: "", email: "", phone: "", website: "", address: "", motto: "",
     logo_url: "", crest_url: "",
     ...DEFAULT_SCHOOL_COLORS,
-    slug: "", custom_domain: "", sms_notifications: false, custom_domain_enabled: false,
+    subdomain: "", slug: "", custom_domain: "", domain_status: "active", subdomain_url: "", portal_url: "",
+    sms_notifications: false, custom_domain_enabled: false,
     application_fee_enabled: true, application_fee_amount: "5000",
   });
   const [tier, setTier] = useState(null);
@@ -24,6 +25,7 @@ export default function SchoolSettings() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState("");
   const [saved, setSaved] = useState(false);
+  const [copiedKey, setCopiedKey] = useState("");
   const [cascadeSummary, setCascadeSummary] = useState(null);
 
   useEffect(() => {
@@ -48,8 +50,12 @@ export default function SchoolSettings() {
             sidebar_color: s.sidebar_color || s.primary_color || DEFAULT_SCHOOL_COLORS.sidebar_color,
             success_color: s.success_color || DEFAULT_SCHOOL_COLORS.success_color,
             violet_color: s.violet_color || DEFAULT_SCHOOL_COLORS.violet_color,
-            slug: s.slug || "",
+            subdomain: s.subdomain || s.slug || "",
+            slug: s.slug || s.subdomain || "",
             custom_domain: s.custom_domain || "",
+            domain_status: s.domain_status || (s.custom_domain ? "pending_dns" : "active"),
+            subdomain_url: s.subdomain_url || (s.subdomain || s.slug ? `https://${s.subdomain || s.slug}.iportalcampus.com` : ""),
+            portal_url: s.portal_url || "",
             sms_notifications: !!s.sms_notifications,
             custom_domain_enabled: !!s.custom_domain_enabled,
             application_fee_enabled: s.application_fee_enabled !== false,
@@ -79,8 +85,18 @@ export default function SchoolSettings() {
     setCascadeSummary(null);
     try {
       const normalizedCode = (form.short_name || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+      const {
+        subdomain: _sub,
+        slug: _slug,
+        custom_domain: _cd,
+        domain_status: _ds,
+        subdomain_url: _su,
+        portal_url: _pu,
+        custom_domain_enabled: _cde,
+        ...editableFields
+      } = form;
       const updated = await base44.entities.School.update(schoolId, {
-        ...form,
+        ...editableFields,
         short_name: normalizedCode || form.short_name,
         code: normalizedCode || undefined,
         school_code: normalizedCode || undefined,
@@ -308,25 +324,122 @@ export default function SchoolSettings() {
           <h3 className="font-heading font-bold text-base text-foreground mb-3 flex items-center gap-2">
             <Globe className="w-4 h-4 text-[hsl(var(--brand-indigo))]" /> Subdomain, Custom Domain & SaaS Add-ons
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>Tenant Subdomain Slug</label>
-              <div className="flex items-center">
-                <input className="w-full h-10 px-3 rounded-l-lg border border-border bg-white text-sm font-mono" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })} placeholder="greenwood" />
-                <span className="h-10 px-3 inline-flex items-center bg-slate-100 border border-l-0 border-border rounded-r-lg text-xs text-muted-foreground font-mono">.iportalcampus.com</span>
+          <div className="rounded-xl border border-border bg-slate-50/70 p-4 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Lock className="w-3.5 h-3.5" />
+                Read-Only — Assigned by Platform Administrator
               </div>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                  form.domain_status === "active"
+                    ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                    : form.domain_status === "verified"
+                      ? "bg-blue-100 text-blue-800 border-blue-200"
+                      : "bg-amber-100 text-amber-800 border-amber-200"
+                }`}
+              >
+                {form.domain_status === "pending_dns"
+                  ? "Pending DNS"
+                  : form.domain_status === "verified"
+                    ? "Verified"
+                    : "Active"}
+              </span>
             </div>
-            <div>
-              <label className={labelCls}>Custom Domain</label>
-              <input className={inputCls} value={form.custom_domain} onChange={(e) => setForm({ ...form, custom_domain: e.target.value })} placeholder="portal.greenwoodschool.edu.ng" />
+
+            {/* Assigned Platform Subdomain */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white rounded-lg border border-border px-3.5 py-2.5">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Assigned Portal Subdomain</p>
+                <p className="font-mono text-sm font-bold text-foreground truncate">
+                  {form.subdomain_url || (form.subdomain ? `https://${form.subdomain}.iportalcampus.com` : "Not assigned yet")}
+                </p>
+              </div>
+              {(form.subdomain_url || form.subdomain) && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = form.subdomain_url || `https://${form.subdomain}.iportalcampus.com`;
+                      navigator.clipboard?.writeText(url);
+                      setCopiedKey("sub");
+                      setTimeout(() => setCopiedKey(""), 2000);
+                    }}
+                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-foreground"
+                  >
+                    <Copy className="w-3.5 h-3.5" /> {copiedKey === "sub" ? "Copied!" : "Copy Link"}
+                  </button>
+                  <a
+                    href={form.subdomain_url || `https://${form.subdomain}.iportalcampus.com`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg border border-border bg-white hover:bg-slate-50 text-xs font-semibold text-[hsl(var(--brand-indigo))]"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              )}
             </div>
+
+            {/* Assigned Custom Domain (if configured by Super Admin) */}
+            {form.custom_domain && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white rounded-lg border border-border px-3.5 py-2.5">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">Custom Domain</p>
+                  <p className="font-mono text-sm font-bold text-[hsl(var(--brand-indigo))] truncate">
+                    https://{form.custom_domain}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(`https://${form.custom_domain}`);
+                    setCopiedKey("custom");
+                    setTimeout(() => setCopiedKey(""), 2000);
+                  }}
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-foreground shrink-0"
+                >
+                  <Copy className="w-3.5 h-3.5" /> {copiedKey === "custom" ? "Copied!" : "Copy Link"}
+                </button>
+              </div>
+            )}
+
+            {/* DNS Setup Instructions when Custom Domain is Pending DNS */}
+            {form.custom_domain && form.domain_status === "pending_dns" && (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 p-3.5 text-xs text-amber-950 space-y-1.5">
+                <p className="font-bold text-amber-900">DNS Setup Instructions (Pending Verification)</p>
+                <p>
+                  To activate <strong className="font-mono">{form.custom_domain}</strong>, add the following DNS record at your domain registrar:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
+                  <div className="bg-white/80 rounded px-2.5 py-1.5 border border-amber-200">
+                    <span className="text-amber-700 block">Type</span>
+                    <strong>CNAME</strong>
+                  </div>
+                  <div className="bg-white/80 rounded px-2.5 py-1.5 border border-amber-200">
+                    <span className="text-amber-700 block">Host / Name</span>
+                    <strong className="break-all">{form.custom_domain}</strong>
+                  </div>
+                  <div className="bg-white/80 rounded px-2.5 py-1.5 border border-amber-200">
+                    <span className="text-amber-700 block">Target / Value</span>
+                    <strong>cname.iportalcampus.com</strong>
+                  </div>
+                </div>
+                <p className="text-[11px] text-amber-800 pt-1">
+                  Once propagated, notify your Platform Administrator to mark the domain as <strong>Active</strong>.
+                </p>
+              </div>
+            )}
+
+            <p className="text-[11px] text-muted-foreground">
+              Need a custom domain (e.g. <span className="font-mono">portal.yourschool.edu.ng</span>) or a subdomain change? Contact Platform Support.
+            </p>
+          </div>
+
+          <div className="mt-4">
             <label className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
               <input type="checkbox" checked={form.sms_notifications} onChange={(e) => setForm({ ...form, sms_notifications: e.target.checked })} className="w-4 h-4 rounded border-border" />
               Enable SMS Notifications Add-on
-            </label>
-            <label className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
-              <input type="checkbox" checked={form.custom_domain_enabled} onChange={(e) => setForm({ ...form, custom_domain_enabled: e.target.checked })} className="w-4 h-4 rounded border-border" />
-              Enable Custom Domain Routing
             </label>
           </div>
         </div>

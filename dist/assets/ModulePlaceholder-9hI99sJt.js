@@ -1,0 +1,6 @@
+import{n as l,a8 as s,j as e}from"./index-DMyKzYyf.js";/**
+ * @license lucide-react v0.475.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const o=[["rect",{x:"2",y:"6",width:"20",height:"8",rx:"1",key:"1estib"}],["path",{d:"M17 14v7",key:"7m2elx"}],["path",{d:"M7 14v7",key:"1cm7wv"}],["path",{d:"M17 3v3",key:"1v4jwn"}],["path",{d:"M7 3v3",key:"7o6guu"}],["path",{d:"M10 14 2.3 6.3",key:"1023jk"}],["path",{d:"m14 6 7.7 7.7",key:"1s8pl2"}],["path",{d:"m8 6 8 8",key:"hl96qh"}]],r=l("Construction",o);function i(){const{module:t}=s(),a=(t||"module").replace(/-/g," ").replace(/\b\w/g,n=>n.toUpperCase());return e.jsxs("div",{className:"flex flex-col items-center justify-center py-24 text-center",children:[e.jsx("div",{className:"w-16 h-16 rounded-2xl bg-[hsl(var(--brand-indigo))]/10 flex items-center justify-center mb-5",children:e.jsx(r,{className:"w-8 h-8 text-[hsl(var(--brand-indigo))]"})}),e.jsx("h2",{className:"font-heading font-bold text-2xl text-foreground mb-2",children:a}),e.jsx("p",{className:"text-muted-foreground max-w-md",children:"This module is part of an upcoming milestone. The architecture and navigation are in place — the full functionality will be rolled out incrementally."})]})}export{i as default};
